@@ -1,0 +1,16 @@
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\bin\Debug\net8.0-windows\ItemsMenage.exe
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\bin\Debug\net8.0-windows\ItemsMenage.deps.json
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\bin\Debug\net8.0-windows\ItemsMenage.runtimeconfig.json
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\bin\Debug\net8.0-windows\ItemsMenage.dll
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\bin\Debug\net8.0-windows\ItemsMenage.pdb
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ItemsMenage.Form1.resources
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ItemsMenage.csproj.GenerateResource.cache
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ItemsMenage.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ItemsMenage.AssemblyInfoInputs.cache
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ItemsMenage.AssemblyInfo.cs
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ItemsMenage.csproj.CoreCompileInputs.cache
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ItemsMenage.dll
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\refint\ItemsMenage.dll
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ItemsMenage.pdb
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ItemsMenage.genruntimeconfig.cache
+C:\Users\hp\source\repos\ItemsMenage\ItemsMenage\obj\Debug\net8.0-windows\ref\ItemsMenage.dll
