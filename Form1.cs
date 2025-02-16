@@ -1,122 +1,223 @@
-using ItemsMenage.Models;
-namespace ItemsMenage
-{
-    public partial class Form1 : Form
+Ôªøusing ItemsMenage.Models;
+namespace ItemsMenage;
+using System.Data.SQLite;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Diagnostics;
+
+
+    public class Database
     {
-        List<Item> listaItemow = new List<Item>();
-        private BindingSource bindingSource = new BindingSource();
-        public Form1()
+        private static string dbFile = "items.db";
+        private static string connectionString = $"Data Source={dbFile};Version=3;";
+
+        // üîπ Inicjalizacja bazy danych - tworzy plik i tabelƒô, je≈õli nie istniejƒÖ
+        public static void InitializeDatabase()
         {
-            InitializeComponent();
-            //dataGridView1.DataSource = new BindingSource { DataSource = listaItemow };
-            bindingSource.DataSource = listaItemow;
-            dataGridView1.DataSource = bindingSource;
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btnDodaj_Click(object sender, EventArgs e)
-        {
-            string tytul = txtTytul.Text;
-            string autor = txtAutor.Text;
-            string typ = cmbTyp.SelectedItem?.ToString() ?? "Nieznany";
-            int rok;
-
-            if (!int.TryParse(txtRok.Text, out rok))
+            if (!File.Exists(dbFile))
             {
-                MessageBox.Show("Rok musi byÊ liczbπ");
-                return;
+                SQLiteConnection.CreateFile(dbFile);
             }
 
-            listaItemow.Add(new Item(tytul, autor, typ, rok));
-
-            bindingSource.ResetBindings(false);
-            //dataGridView1.DataSource = listaItemow;
-            // Zabezpieczenie przed b≥Ídem klikniÍcia w pusty obszar tabeli
-            if (dataGridView1.Rows.Count > 0)
+            using (var connection = new SQLiteConnection(connectionString))
             {
-                dataGridView1.ClearSelection();
-                dataGridView1.Rows[dataGridView1.Rows.Count - 1].Selected = true; // Zaznacz ostatnio dodany element
-            }
-        }
+                connection.Open();
+                string createTableQuery = @"
+                    CREATE TABLE IF NOT EXISTS Items (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Tytul TEXT NOT NULL,
+                        Autor TEXT,
+                        Typ TEXT,
+                        Rok INTEGER
+                    );";
 
-        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            // Jeúli lista jest pusta lub indeks jest -1, zakoÒcz metodÍ
-            if (listaItemow.Count == 0 || e.RowIndex < 0 || e.RowIndex >= listaItemow.Count)
-            {
-                return;
-            }
-
-            // Pobranie zaznaczonego elementu
-            Item zaznaczonyItem = listaItemow[e.RowIndex];
-
-            // Aktualizacja pÛl tekstowych
-            txtTytul.Text = zaznaczonyItem.Tytul;
-            txtAutor.Text = zaznaczonyItem.Autor;
-            cmbTyp.SelectedItem = zaznaczonyItem.Typ;
-            txtRok.Text = zaznaczonyItem.Rok.ToString();
-        }
-
-        private void btnUsun_Click(object sender, EventArgs e)
-        {
-            if (dataGridView1.SelectedRows.Count > 0)
-            {
-                // Tworzymy listÍ indeksÛw, øeby unikaÊ b≥ÍdÛw podczas usuwania
-                List<int> indexes = new List<int>();
-
-                foreach (DataGridViewRow row in dataGridView1.SelectedRows)
+                using (var command = new SQLiteCommand(createTableQuery, connection))
                 {
-                    indexes.Add(row.Index);
+                    command.ExecuteNonQuery();
                 }
+            }
+        }
 
-                // Usuwamy elementy od koÒca, øeby uniknπÊ problemÛw z przesuwajπcymi siÍ indeksami
-                indexes.Sort();
-                indexes.Reverse();
+        // üîπ Dodawanie nowego elementu
+        public static void DodajItem(Item item)
+        {
+            using (var connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+                string insertQuery = "INSERT INTO Items (Tytul, Autor, Typ, Rok) VALUES (@Tytul, @Autor, @Typ, @Rok)";
 
-                foreach (int index in indexes)
+                using (var command = new SQLiteCommand(insertQuery, connection))
                 {
-                    if (index >= 0 && index < listaItemow.Count)
+                    command.Parameters.AddWithValue("@Tytul", item.Tytul);
+                    command.Parameters.AddWithValue("@Autor", item.Autor);
+                    command.Parameters.AddWithValue("@Typ", item.Typ);
+                    command.Parameters.AddWithValue("@Rok", item.Rok);
+                    int rowsAffected = command.ExecuteNonQuery();
+                MessageBox.Show($"DOdano {rowsAffected} rekord√≥w");
+            }
+            }
+        }
+
+        // üîπ Pobieranie wszystkich element√≥w
+        public static List<Item> PobierzWszystkie()
+        {
+            List<Item> listaItemow = new List<Item>();
+
+            using (var connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+                string selectQuery = "SELECT * FROM Items";
+
+                using (var command = new SQLiteCommand(selectQuery, connection))
+                using (var reader = command.ExecuteReader())
+                {
+                while (reader.Read())
+                {
+                    var item = new Item
                     {
-                        listaItemow.RemoveAt(index);
-                    }
-                }
-                bindingSource.ResetBindings(false);
-                //dataGridView1.DataSource = null;
-                //dataGridView1.DataSource = listaItemow;
-            }
-            else
-            {
-                MessageBox.Show("Najpierw wybierz wiersz do usuniÍcia!");
-            }
-        }
+                        Id = reader.GetInt32(0),
+                        Tytul = reader.GetString(1),
+                        Autor = reader.IsDBNull(2) ? "Nieznany" : reader.GetString(2),
+                        Typ = reader.IsDBNull(3) ? "Nieznany" : reader.GetString(3),
+                        Rok = reader.GetInt32(4)
+                    };
 
-        private void btnSzukaj_Click(object sender, EventArgs e)
+                    Console.WriteLine($"Pobrano: {item.Id}, {item.Tytul}, {item.Autor}, {item.Typ}, {item.Rok}"); // ‚úÖ Logowanie
+                    listaItemow.Add(item);
+                }
+            }
+            }
+            return listaItemow;
+        }
+    public static void UsunItem(int id)
+    {
+        using (var connection = new SQLiteConnection(connectionString))
         {
-            string szukanyTekst = txtSzukaj.Text.ToLower().Trim(); // Upewnij siÍ, øe szukany tekst nie zawiera zbÍdnych spacji
+            connection.Open();
+            string deleteQuery = "DELETE FROM Items WHERE Id = @Id";
 
-            List<Item> nowaLista = new List<Item>();
-
-            foreach (Item item in listaItemow)
+            using (var command = new SQLiteCommand(deleteQuery, connection))
             {
-                if (item.Tytul.ToLower().Contains(szukanyTekst))
-                {
-                    nowaLista.Add(item);
-                }
+                command.Parameters.AddWithValue("@Id", id);
+                command.ExecuteNonQuery();
             }
-
-            // Sprawdzenie, czy znaleziono wyniki
-            if (nowaLista.Count == 0)
-            {
-                MessageBox.Show("Nie znaleziono wynikÛw dla: " + szukanyTekst);
-                nowaLista = new List<Item>(listaItemow); // PrzywrÛcenie oryginalnej listy
-            }
-
-            bindingSource.DataSource = nowaLista;
-            bindingSource.ResetBindings(false);
         }
+    }
+
+}
+
+
+
+public partial class Form1 : Form
+{
+    List<Item> listaItemow = new List<Item>();
+    private BindingSource bindingSource = new BindingSource();
+    private void WczytajDane()
+    {
+        listaItemow = Database.PobierzWszystkie();
+        bindingSource.DataSource = listaItemow;
+        bindingSource.ResetBindings(false);
+
+        MessageBox.Show($"Lista po przypisaniu {((List<Item>)bindingSource.DataSource).Count}");
+    }
+
+    public Form1()
+    {
+        InitializeComponent();
+        //dataGridView1.DataSource = new BindingSource { DataSource = listaItemow };
+        //bindingSource.DataSource = listaItemow;
+        //dataGridView1.DataSource = bindingSource;
+        Database.InitializeDatabase();
+        bindingSource = new BindingSource();
+        dataGridView1.DataSource = bindingSource;
+        WczytajDane();
+    }
+
+    private void Form1_Load(object sender, EventArgs e)
+    {
+
+    }
+
+    private void btnDodaj_Click(object sender, EventArgs e)
+    {
+        string tytul = txtTytul.Text;
+        string autor = txtAutor.Text;
+        string typ = cmbTyp.SelectedItem?.ToString() ?? "Nieznany";
+        int rok;
+
+        if (!int.TryParse(txtRok.Text, out rok))
+        {
+            MessageBox.Show("Rok musi byƒá liczbƒÖ");
+            return;
+        }
+
+        Item nowyItem = new Item(tytul, autor, typ, rok);
+        Database.DodajItem(nowyItem);
+        WczytajDane();
+
+        //bindingSource.DataSource = Database.PobierzWszystkie();
+        //bindingSource.ResetBindings(false);
+    }
+
+    private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+    {
+        // Je≈õli lista jest pusta lub indeks jest -1, zako≈Ñcz metodƒô
+        if (e.RowIndex < 0 || e.RowIndex >= listaItemow.Count)
+        {
+            return;
+        }
+
+        // Pobranie zaznaczonego elementu
+        Item zaznaczonyItem = (Item)bindingSource[e.RowIndex];
+
+        // Aktualizacja p√≥l tekstowych
+        txtTytul.Text = zaznaczonyItem.Tytul;
+        txtAutor.Text = zaznaczonyItem.Autor;
+        cmbTyp.SelectedItem = zaznaczonyItem.Typ;
+        txtRok.Text = zaznaczonyItem.Rok.ToString();
+    }
+
+    private void btnUsun_Click(object sender, EventArgs e)
+    {
+        if (dataGridView1.SelectedRows.Count > 0)
+        {
+            foreach (DataGridViewRow row in dataGridView1.SelectedRows)
+            {
+                Item item = (Item)bindingSource[row.Index];
+                Database.UsunItem(item.Id);
+            }
+
+            WczytajDane(); // ‚Üê Aktualizacja tabeli po usuniƒôciu
+        }
+        else
+        {
+            MessageBox.Show("Najpierw wybierz wiersz do usuniƒôcia!");
+        }
+    }
+
+    private void btnSzukaj_Click(object sender, EventArgs e)
+    {
+        string szukanyTekst = txtSzukaj.Text.ToLower().Trim(); // Upewnij siƒô, ≈ºe szukany tekst nie zawiera zbƒôdnych spacji
+
+        List<Item> nowaLista = new List<Item>();
+
+        foreach (Item item in listaItemow)
+        {
+            if (item.Tytul.ToLower().Contains(szukanyTekst))
+            {
+                nowaLista.Add(item);
+            }
+        }
+
+        // Sprawdzenie, czy znaleziono wyniki
+        if (nowaLista.Count == 0)
+        {
+            MessageBox.Show("Nie znaleziono wynik√≥w dla: " + szukanyTekst);
+            nowaLista = new List<Item>(listaItemow); // Przywr√≥cenie oryginalnej listy
+        }
+
+        bindingSource.DataSource = nowaLista;
+        bindingSource.ResetBindings(false);
     }
 }

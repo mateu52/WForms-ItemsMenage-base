@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ItemsMenage")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+94e96c3ea87745a136b429139b3f04efc6e453af")]
 [assembly: System.Reflection.AssemblyProductAttribute("ItemsMenage")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ItemsMenage")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
